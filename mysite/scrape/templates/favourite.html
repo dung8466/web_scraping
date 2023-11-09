@@ -1,0 +1,105 @@
+{%extends 'search_form.html' %}
+
+{% load humanize %}
+
+{% block content %}
+    {% if favourite_items|length != 0%}
+    {% comment %} <ul class="d-flex flex-row flex-wrap align-content-center justify-content-around align-items-center list-unstyled">
+            {% for p in favourite_items %}
+                <li>
+                    <div class="card h-100 mt-2 border-dark mb-3" style="max-width: 18rem;">
+                        <img src="{{p.img}}" class="card-img-top" style="height:17.813em;width:auto;" alt="product image">
+                        <div class="card-body">
+                            <h5 class="card-title">{{p.name}}</h5>
+                            {% if p.current_price == 0 %}
+                                <p class="card-text">Giá Liên Hệ</p>
+                            {% else %}
+                                <p class="card-text">{{p.current_price|intcomma}}</p>
+                            {% endif %}
+                            <p class="card-text">Store: {{p.place}}</p>
+                            <a href="{{p.url}}" target="_blank" class="btn btn-primary">Go to store</a>
+                            <form action="{% url 'remove-from-favourite' p.id %}" method="post">
+                                {% csrf_token %}
+                                <button class="add-to-cart-btn">Remove from Favourite</button>
+                            </form>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul> {% endcomment %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Image</th>
+                    <th scope="col">Product</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Store</th>
+                    <th scope="col">Date added</th>
+                    <th scope="col">Remove from Favourite</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in favourite_items %}
+                <tr>
+                    <th scope="row">
+                        <img src="{{p.img}}" class="card-img-top" style="height:17.813em;width:auto;" alt="product image">
+                    </th>
+                    <td>
+                        <h5 class="card-title">
+                            <a href="{{p.url}}" target="_blank">
+                                {{p.name}}
+                            </a>
+                            <div class="rating">
+                                <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 1 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 2 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 3 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 4 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                <i style="color: 	#ffe234;" class="bi {% if p.average_rating == 5 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                            </div>
+                            <a href="{% url 'add_review' p.id %}" id="add-review" class="link-underline-opacity-0">
+                                    Review   
+                            </a>
+                            <a href="{% url 'view_reviews' p.id %}"id="view-reviews" class="link-underline-opacity-0">
+                                    View 
+                            </a> 
+                        </h5>
+                    </td>
+                    <td>
+                        {% if p.current_price == 0 %}
+                            <p class="card-text">Giá Liên Hệ</p>
+                        {% else %}
+                            <p class="card-text">{{p.current_price|intcomma}} đồng</p>
+                        {% endif %}
+                        <form action="{% url 'price_history' p.id %}" method="post" id="price_history">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button class="btn btn-primary" >
+                                Price History
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <p class="card-text">{{p.place}}</p>
+                    </td>
+                    <td>
+                        <p class="card-text">{{p.date_add}}</p>
+                    </td>
+                    <td>
+                        <form action="{% url 'remove-from-favourite' p.id %}" method="post">
+                            {% csrf_token %}
+                            <button class="remove-from-cart-btn btn btn-primary">
+                                Remove
+                                {% comment %} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+                                    <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/>
+                                </svg>  {% endcomment %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You haven't add items to list.</p>
+    {% endif%}
+{% endblock %}

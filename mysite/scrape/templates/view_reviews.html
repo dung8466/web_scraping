@@ -1,0 +1,21 @@
+{%extends 'search_form.html' %}
+
+{% block content %}
+  <h2>Product Reviews</h2>
+  <ul>
+    {% for review in reviews %}
+      <li>
+        <strong>User:</strong> {{ review.user.username }}<br>
+        <strong>Rating:</strong> {{ review.rating }} star(s)<br>
+        <strong>Comment:</strong> {{ review.comment }}<br>
+        <small>Posted on {{ review.created_at }}</small>
+      </li>
+    {% empty %}
+      <li>No reviews available for this product.</li>
+    {% endfor %}
+  </ul>
+  
+  {% comment %} <a href="{% url 'product_detail' product.id %}">Back to Product</a> {% endcomment %}
+  <a href="{% url 'add_review' product.id %}">Add a Review</a>
+  <button class="btn btn-primary" onclick="history.back()">Back to Product</button>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'search_form.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Price History</h1>
+
+    <!-- Price history chart container -->
+    <!-- Price history chart container -->
+    <canvas id="priceChart" width="400" height="200"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+  
+  <script>
+    // Extract timestamps and prices
+    let timestamps = {{ price_history_data | safe }};
+    let prices = timestamps.map(entry => entry.price);
+    timestamps = timestamps.map(entry => entry.timestamp);
+
+    // Get the canvas element
+    const ctx = document.getElementById('priceChart');
+
+    // Create a new chart
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: timestamps,
+        datasets: [
+          {
+            label: 'Price History',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
+            pointRadius: 5,
+            pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+            data: prices,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'day',
+              parser: 'YYYY-MM-DD',  // Specify the date format
+            },
+          },
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  </script>
+
+{% endblock %}

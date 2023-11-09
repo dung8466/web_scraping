@@ -1,0 +1,16 @@
+{%extends 'search_form.html' %}
+
+{% load humanize %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center">
+    <form action="{% url 'compare_result' %}" method=POST class="my-form input-group p-2 m-2 w-25 rounded-2">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+        {% render_field compare_form.name placeholder="Search product..." class+="form-control input-form"%}
+        {% comment %} <input type="text" id="search" placeholder="Search product" name="search-input" class="form-control rounded"> {% endcomment %}
+        {% comment %} <button type="submit" class="btn btn-secondary"><i class="fa fa-search"></i></button> {% endcomment %}
+    </form>
+</div>
+{% endblock %}

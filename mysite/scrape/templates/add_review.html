@@ -1,0 +1,41 @@
+{%extends 'search_form.html' %}
+
+{% block content %}
+  <h2>Add a Review</h2>
+  <div class="container">
+  <form method="post" action="{% url 'add_review' product.id %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="rating" class="form-label">Rating</label>
+      <select name="rating" id="rating" class="form-select">
+        <option selected value="1">1 star</option>
+        <option value="2">2 stars</option>
+        <option value="3">3 stars</option>
+        <option value="4">4 stars</option>
+        <option value="5">5 stars</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="text" class="form-label">Comment</label>
+      <textarea name="text" id="comment" rows="4" class="form-control"></textarea>
+    </div>
+      {% comment %} <input type="hidden" name="next" value="{{ request.path }}"> {% endcomment %}
+      <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+  </form>
+
+</div>
+    <button class="btn btn-secondary" onclick="history.back()">Back to Product</button>
+  {% comment %} <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+     
+  </form>  {% endcomment %}
+
+<script>
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+{% endblock %}

@@ -1,0 +1,185 @@
+{%extends 'compare.html' %}
+
+{% load humanize %}
+{% load widget_tweaks %}
+
+{% comment %} {% block content %}
+    <div class="d-flex align-items-center justify-content-center">
+        <form action="{% url 'compare_result' %}" method=POST class="my-form input-group p-2 m-2 w-25 rounded-2">
+            {% csrf_token %}
+            {% render_field compare_form.name placeholder="Search product..." class+="form-control input-form"%} {% endcomment %}
+            {% comment %} <input type="text" id="search" placeholder="Search product" name="search-input" class="form-control rounded"> {% endcomment %}
+            {% comment %} <button type="submit" class="btn btn-secondary"><i class="fa fa-search"></i></button> {% endcomment %}
+        {% comment %} </form>
+    </div>
+    {% for p in lists %}
+        <p>{{p.name}}</p>
+        <p>{{p.place}}</p>
+    {% endfor %}
+{% endblock %} {% endcomment %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-center">
+    <form action="{% url 'compare_result' %}" method="POST" class="my-form input-group p-2 m-2 w-25 rounded-2">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+        {% render_field compare_form.name placeholder="Search product..." class+="form-control input-form"%}
+    </form>
+</div>
+
+<div class="product-gallery">
+        <div class="stack">
+            {% comment %} <div class="product-card lowest-price-card">
+                <h2>{{ lowest_price_item.item.name }}</h2>
+                <p>Place: {{ lowest_price_item.item.place }}</p>
+                <p>Price: {{ lowest_price_item.item.current_price }}</p>
+                <a href="{{ lowest_price_item.item.url }}">Product Link</a>
+                <p>{{ lowest_price_item.item.date_add }}</p>
+            </div> {% endcomment %}
+            <div class="card h-100 mt-2 border-dark mb-3" style="max-width: 20rem;">
+                <img src="{{lowest_price_item.item.img}}" class="card-img-top" style="height:17.813em;width:18rem;" alt="product image">
+                <div class="card-body product-card lowest-price-card">
+                     <h5 class="card-title">{{lowest_price_item.item.name}}</h5>
+                    {% if lowest_price_item.item.current_price == 0 %}
+                        <p class="card-text">Giá Liên Hệ</p>
+                    {% else %}
+                        <p class="card-text">{{lowest_price_item.item.current_price|intcomma}}</p>
+                    {% endif %}
+                    <p class="card-text">Store: {{lowest_price_item.item.place}}</p>
+                    <p class="card-text">Add at {{lowest_price_item.item.date_add}}</p>
+                    <a href="{{lowest_price_item.item.url}}" target="_blank" class="btn btn-primary">Go to store</a>
+                    {% comment %} <form action="{% url 'add-to-favourite' lowest_price_item.item.id %}" method="post">
+                        {% csrf_token %}
+                        <button class="add-to-cart-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
+                                <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/>
+                            </svg>
+                        </button>
+                    </form> {% endcomment %}
+                </div>
+            </div>
+        </div>
+        <div id="carouselExample" class="carousel slide" style="max-width: 20rem;">
+            <div class="carousel-inner">
+                {% for product in other_products %}
+                    <div class="carousel-item card h-100 mt-2 border-dark mb-3 {% if forloop.first %} active{% endif %}" style="max-width: 20rem;">
+                        <img src="{{product.item.img}}" class="card-img-top" style="height:17.813em;width:18rem;" alt="product image">
+                        <div class="card-body product-card ">
+                            <h5 class="card-title">{{product.item.name}}</h5>
+                            {% if product.item.current_price == 0 %}
+                                <p class="card-text">Giá Liên Hệ</p>
+                            {% else %}
+                                <p class="card-text">{{product.item.current_price|intcomma}}</p>
+                            {% endif %}
+                            <p class="card-text">Store: {{product.item.place}}</p>
+                            <p class="card-text">Add at {{product.item.date_add}}</p>
+                            <a href="{{product.item.url}}" target="_blank" class="btn btn-primary">Go to store</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        {% comment %} <div id="carouselBasicExample" class="carousel slide carousel-fade" data-ride="carousel">
+    <!-- Inner -->
+            <div class="carousel-inner">
+                {% for product in other_products %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h5>{{ product.item.name }}</h5>
+                            <p>Place: {{ product.item.place }}</p>
+                            <p>Price: {{ product.price }}</p>
+                            <a href="{{ product.item.url }}" class="btn btn-primary">Product Link</a>
+                            <p>{{ product.item.date_add }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+    <!-- Inner -->
+
+    <!-- Controls -->
+            <a class="carousel-control-prev" href="#carouselBasicExample" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselBasicExample" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </a>
+        </div> {% endcomment %}
+</div>
+
+
+<style>
+    .product-gallery {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Create a two-column grid layout */
+        gap: 20px; /* Add some gap between the columns */
+        margin: 20px;
+    }
+
+    .stack {
+        /* No need to modify this part */
+    }
+
+    .carousel {
+        /* No need to modify this part */
+    }
+
+    .lowest-price-card,
+    .other-product-container {
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+
+    /* CSS for navigation buttons */
+    .navigation-buttons {
+        /* No need to modify this part */
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    .carousel-control-next,
+    .carousel-control-prev /*, .carousel-indicators */ {
+        filter: invert(100%);
+    }
+</style>
+
+<script>
+    const otherProductContainer = document.querySelector('.other-product-container');
+    const otherProductCards = document.querySelectorAll('.other-product-card');
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+    let currentIndex = 0;
+
+    function showProductCard(index) {
+        otherProductCards.forEach(card => card.style.display = 'none');
+        if (index >= 0 && index < otherProductCards.length) {
+            otherProductCards[index].style.display = 'block';
+        }
+    }
+
+    function showNextProduct() {
+        currentIndex = (currentIndex + 1) % otherProductCards.length;
+        showProductCard(currentIndex);
+    }
+
+    function showPreviousProduct() {
+        currentIndex = (currentIndex - 1 + otherProductCards.length) % otherProductCards.length;
+        showProductCard(currentIndex);
+    }
+
+    nextButton.addEventListener('click', showNextProduct);
+    prevButton.addEventListener('click', showPreviousProduct);
+
+    showProductCard(currentIndex);
+</script>
+{% endblock %}
