@@ -1,21 +1,36 @@
 {%extends 'search_form.html' %}
 
 {% block content %}
-  <h2>Product Reviews</h2>
-  <ul>
+  <h2>Product Reviews: 
+    <a href="{{product.url}}" target="_blank">{{product.name}}</a>
+  </h2>
+  <div class="m-5">
+  {% if not user.is_shop %}
+    <a href="{% url 'add_review' product.id %}">Add a Review</a>
+  {% endif %}
+  <ul class="list-group list-group-flush">
     {% for review in reviews %}
-      <li>
+      <li class="list-group-item">
         <strong>User:</strong> {{ review.user.username }}<br>
-        <strong>Rating:</strong> {{ review.rating }} star(s)<br>
+        
+        <div class="rating">
+          <strong>Rating:</strong>
+          <i style="color: 	#ffe234;" class="bi {% if review.rating >= 1 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+          <i style="color: 	#ffe234;" class="bi {% if review.rating >= 2 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+          <i style="color: 	#ffe234;" class="bi {% if review.rating >= 3 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+          <i style="color: 	#ffe234;" class="bi {% if review.rating >= 4 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+          <i style="color: 	#ffe234;" class="bi {% if review.rating == 5 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+         </div>
+        {% if review.comment %}
         <strong>Comment:</strong> {{ review.comment }}<br>
+        {% endif %}
         <small>Posted on {{ review.created_at }}</small>
       </li>
     {% empty %}
       <li>No reviews available for this product.</li>
     {% endfor %}
   </ul>
-  
+  </div>  
   {% comment %} <a href="{% url 'product_detail' product.id %}">Back to Product</a> {% endcomment %}
-  <a href="{% url 'add_review' product.id %}">Add a Review</a>
-  <button class="btn btn-primary" onclick="history.back()">Back to Product</button>
+  <button class="btn btn-primary" onclick="history.back()">Back</button>
 {% endblock %}

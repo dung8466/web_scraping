@@ -1,0 +1,20 @@
+{%extends 'search_form.html' %}
+{% load crispy_forms_tags %} 
+{% load humanize %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'style.css' %}">
+<link href="toastr.css" rel="stylesheet"/>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+{% block content %}
+    
+    <h1>Change Product</h1>
+    <div class="container">
+        <form method="post" action="{% url 'change_product' product.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+            {{ newForm.as_p}}
+            <button type="submit" class="btn btn-success">Save</button>
+        </form>
+    </div>
+
+{% endblock %}

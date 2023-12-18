@@ -39,9 +39,15 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'compare' %}">Compare <span class="sr-only">(current)</span></a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'favourite' %}">Favourite <span class="sr-only">(current)</span></a>
-                    </li>
+                    {% if not user.is_shop%}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'favourite' %}">Favourite <span class="sr-only">(current)</span></a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'shop' %}">Shop <span class="sr-only">(current)</span></a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'products' %}">Database</a>
                     </li>
@@ -56,9 +62,7 @@
             </div>
         </div>
     </nav>
-    <div class="header-container">
-        <h1>Find products from many sites</h1>
-    </div>
+    {% block shop_signup %}{% endblock %}
     <div class="spinner-border visually-hidden" role="status">
         <span class="visually-hidden">Loading...</span>
     </div>

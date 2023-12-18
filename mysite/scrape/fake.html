@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Product</title>
+    <style>
+        #product-container {
+            text-align: center;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="product-container">
+        <h1 id="product-name">Fake Product</h1>
+        <img id="product-image" src="https://via.placeholder.com/150" alt="Product Image">
+        <p id="product-url"><a href="#">Product URL</a></p>
+        <p id="product-price">Price: $100.00</p>
+    </div>
+
+    <script>
+        function generateRandomPrice() {
+            // Generate a random price between 50 and 150
+            return (Math.random() * 100 + 50).toFixed(2);
+        }
+
+        function updateProductPrice() {
+            const priceElement = document.getElementById('product-price');
+            const newPrice = generateRandomPrice();
+            priceElement.textContent = `Price: $${newPrice}`;
+        }
+
+        // Initial price update
+        updateProductPrice();
+
+        // Set interval to update the price every 10 seconds
+        setInterval(updateProductPrice, 10000);
+    </script>
+
+</body>
+
+</html>

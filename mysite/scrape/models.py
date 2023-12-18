@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
 import datetime
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
+from django.core.validators import RegexValidator
 
 # Create your models here.
 class Product(models.Model):
@@ -29,6 +30,19 @@ class Product(models.Model):
         self.price_history = price_history
         self.save()
 
+class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)
+    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
+    phone = models.CharField(validators=[phone_regex], max_length=17, blank=False, null=False) # Validators should be a list
+    is_shop = models.BooleanField(default=False)
+    shop_name = models.CharField(max_length=50, null=True, blank=True)
+    products = models.ManyToManyField(Product, blank=True)
+
+    class Meta:
+        db_table = "scrape_customuser"
+
+CustomUser._meta.get_field('groups').remote_field.related_name = 'custom_user_groups'
+CustomUser._meta.get_field('user_permissions').remote_field.related_name = 'custom_user_permissions'
 
 class ProductName(models.Model):
     name = models.CharField(max_length=200)
@@ -45,7 +59,7 @@ class ProductFilter(models.Model):
     price = models.CharField(max_length=50, choices=price_choices, null=True, blank=True)
 
 class Favourite(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     product = models.ManyToManyField(Product, through='FavouriteItem')
     
     class Meta:
@@ -64,7 +78,7 @@ class CompareName(models.Model):
         return self.name
 
 class PriceHistory(models.Model):
-    productItem = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
 
@@ -72,7 +86,7 @@ class PriceHistory(models.Model):
         db_table = "scrape_pricehistory"
 
 class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     rating = models.IntegerField()  # You can add a rating field if needed
     text = models.TextField(blank=True)
@@ -83,4 +97,6 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review by {self.user.username} for {self.product.name}"
-    
+
+
+

@@ -27,15 +27,15 @@
                 </li>
             {% endfor %}
         </ul> {% endcomment %}
-        <table class="table table-bordered">
+        <table class="table table-bordered custom-table">
             <thead>
                 <tr>
-                    <th scope="col">Image</th>
-                    <th scope="col">Product</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Store</th>
-                    <th scope="col">Date added</th>
-                    <th scope="col">Remove from Favourite</th>
+                    <th scope="col" class="col-3 custom-color" style="background-color: #1C4E80; color: white;">Image</th>
+                    <th scope="col" class="col-4 custom-color" style="background-color: #1C4E80; color: white;">Product</th>
+                    <th scope="col" class="col-1,5 custom-color" style="background-color: #1C4E80; color: white;">Price</th>
+                    <th scope="col" class="custom-color" style="background-color: #1C4E80; color: white;">Store</th>
+                    <th scope="col" class="custom-color" style="background-color: #1C4E80; color: white;">Date added</th>
+                    <th scope="col" class="custom-color" style="background-color: #1C4E80; color: white;">Favourite</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,7 +45,7 @@
                         <img src="{{p.img}}" class="card-img-top" style="height:17.813em;width:auto;" alt="product image">
                     </th>
                     <td>
-                        <h5 class="card-title">
+                        <h5 class="card-title d-flex flex-column align-items-start">
                             <a href="{{p.url}}" target="_blank">
                                 {{p.name}}
                             </a>
@@ -56,10 +56,10 @@
                                 <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 4 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
                                 <i style="color: 	#ffe234;" class="bi {% if p.average_rating == 5 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
                             </div>
-                            <a href="{% url 'add_review' p.id %}" id="add-review" class="link-underline-opacity-0">
+                            <a href="{% url 'add_review' p.id %}?next={{ request.path }}" id="add-review" class="text-decoration-none mr-2 review-link">
                                     Review   
                             </a>
-                            <a href="{% url 'view_reviews' p.id %}"id="view-reviews" class="link-underline-opacity-0">
+                            <a href="{% url 'view_reviews' p.id %}?next={{ request.path }}" id="view-reviews" class="text-decoration-none">
                                     View 
                             </a> 
                         </h5>
@@ -74,7 +74,7 @@
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.path }}">
                             <button class="btn btn-primary" >
-                                Price History
+                                <i class="bi bi-bar-chart-line"></i>
                             </button>
                         </form>
                     </td>
@@ -87,7 +87,7 @@
                     <td>
                         <form action="{% url 'remove-from-favourite' p.id %}" method="post">
                             {% csrf_token %}
-                            <button class="remove-from-cart-btn btn btn-primary">
+                            <button class="remove-from-cart-btn btn btn-danger">
                                 Remove
                                 {% comment %} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star" viewBox="0 0 16 16">
                                     <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/>
@@ -102,4 +102,14 @@
     {% else %}
         <p>You haven't add items to list.</p>
     {% endif%}
+
+<style>
+    .custom-table {
+        table-layout: fixed;
+    }
+    .custom-color {
+        background-color: #1C4E80;
+        color: white;
+    }
+</style>
 {% endblock %}

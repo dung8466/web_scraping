@@ -1,19 +1,212 @@
 {% extends "base.html" %}
 
 {% load widget_tweaks %}
-
+{% load humanize %}
 {% block form %}
-<div id="searchbar" class="d-flex flex-row">
+<div id="searchbar" class="d-flex flex-row ms-5">
     <form action="{% url 'search_result' %}" method=POST class="my-form input-group flex-nowrap bg-light mx-0 mx-lg-auto rounded p-1">
         {% csrf_token %}
         {{ place.place }}
         <input type="hidden" name="next" value="{{ request.path }}">
         {% render_field form.name placeholder="Search product..." class+="form-control input-form"%}
         {% comment %} <input type="text" id="search" placeholder="Search product" name="search-input" class="form-control rounded"> {% endcomment %}
-        {% comment %} <button type="submit" class="btn btn-secondary"><i class="fa fa-search"></i></button> {% endcomment %}
+        <button type="submit" class="btn btn-secondary"><i class="fa fa-search"></i></button>
     </form>
 </div>
 {% endblock %}
+
+{% comment %} {% block shop_signup %}
+    {% if not user.is_shop %}
+        <p>
+            Want to sell products?
+            <a href="{% url 'shop_user_signup' %}">Sign Up</a>
+        </p>
+        <p> Or <a href="{% url 'login' %}">Log in Shop!</a>
+    {% endif %}
+    {% for shop in shop_data %}
+            {% if shop.products|length != 0 %}
+            <h2>{{ shop.user.shop_name }}
+            <div class="container mt-3">
+    <div class="row">
+        <div class="col-1">
+            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+        </div>
+        <div class="col-10">
+            <div id="productCarousel" class="carousel slide" data-bs-interval="false">
+                <div class="carousel-inner">
+                    <!-- Your carousel items here -->
+                    {% for p in shop.products %}
+                {% if forloop.counter0|divisibleby:4 %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <div class="row row-cols-1 row-cols-md-4 g-4 d-flex">
+                {% endif %}
+                            <div class="col">
+                                <div class="card">
+                                    <!-- Your card content -->
+                                    <!-- ... -->
+                                    <img src="{{p.img}}" class="card-img-top" style="height:17.813em;width:auto;" alt="product image">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{p.name}}</h5>
+                                        <div class="rating">
+                                            <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 1 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                            <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 2 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                            <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 3 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                            <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 4 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                            <i style="color: 	#ffe234;" class="bi {% if p.average_rating == 5 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                        </div>
+                                        <a href="{% url 'view_reviews' p.id %}?next={{ request.path }}" id="view-reviews" class="text-decoration-none">
+                                            View 
+                                        </a>
+                                        {% if p.current_price == 0 %}
+                                            <p class="card-text">Giá Liên Hệ</p>
+                                        {% else %}
+                                            <p class="card-text">{{p.current_price|intcomma}} đồng.</p>
+                                        {% endif %}
+                                        <p class="card-text">Store: {{p.place}}</p>
+                                        <p class="card-text">Add at {{p.date_add}}</p>
+                                        <div style="display: flex; gap:10px;">
+                                            <button class="btn-outline-secondary btn">
+                                                <a href="{% url 'change_product' p.id %}?next={{ request.path }}" id="add-review" class='text-decoration-none review-link mr-2'>
+                                                        Change  
+                                                </a>
+                                            </button>
+                                            <form action="{% url 'delete_product' p.id %}" method="post">
+                                                {% csrf_token %}
+                                                <button class="remove-from-cart-btn btn btn-danger">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                {% if forloop.counter|divisibleby:4 or forloop.last %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+                </div>
+        </div>
+    </div>
+        <div class="col-1">
+            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+            {% endif %}
+    {% endfor %}
+<style>
+    a{
+        text-decoration: none;
+    }
+</style>
+{% endblock %} {% endcomment %}
+{% block shop_signup %}
+    {% if not user.is_shop %}
+        <p>
+            Want to sell products?
+            <a href="{% url 'shop_user_signup' %}">Sign Up</a>
+        </p>
+        <p> Or <a href="{% url 'login' %}">Log in Shop!</a>
+    {% endif %}
+    {% for shop in shop_data %}
+        {% if shop.products|length != 0 %}
+            <h2>{{ shop.user.shop_name }}</h2>
+            <div class="container mt-3">
+                <div class="row">
+                    {% if shop.products|length > 5%}
+                    <div class="col-1">
+                        <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel{{ forloop.counter }}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    <div class="col-10">
+                        <div id="productCarousel{{ forloop.counter }}" class="carousel slide" data-bs-interval="false">
+                            <div class="carousel-inner">
+                                {% for p in shop.products %}
+                                    {% if forloop.counter0|divisibleby:4 %}
+                                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                            <div class="row row-cols-1 row-cols-md-4 g-4 d-flex">
+                                    {% endif %}
+                                    <div class="col">
+                                        <!-- Your card content -->
+                                        <div class="card">
+                                            <!-- ... -->
+                                            <img src="{{p.img}}" class="card-img-top" style="height:17.813em;width:auto;" alt="product image">
+                                            <div class="card-body">
+                                                <a href="{{p.url}}">
+                                                    <h5 class="card-title">{{p.name}}</h5>
+                                                </a>
+                                                {% if p.current_price == 0 %}
+                                                    <p class="card-text">Giá Liên Hệ</p>
+                                                {% else %}
+                                                    <p class="card-text">{{p.current_price|intcomma}} đồng.</p>
+                                                {% endif %}
+                                                <div class="rating">
+                                                    <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 1 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                                    <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 2 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                                    <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 3 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                                    <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 4 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                                    <i style="color: 	#ffe234;" class="bi {% if p.average_rating == 5 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                                    <div>
+                                                    {% if not user.is_shop %}
+                                                    <a href="{% url 'add_review' p.id %}?next={{ request.path }}" id="add-review" class="text-decoration-none mr-2 review-link">
+                                                        Review   
+                                                    </a>
+                                                    {% endif %}
+                                                    <a href="{% url 'view_reviews' p.id %}?next={{ request.path }}" id="view-reviews" class="text-decoration-none">
+                                                        View 
+                                                    </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if forloop.counter|divisibleby:4 or forloop.last %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if shop.products|length > 5%}
+                    <div class="col-1">
+                        <button class="carousel-control-next" type="button" data-bs-target="#productCarousel{{ forloop.counter }}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+    <style>
+        a{
+            text-decoration: none;
+        }
+        .carousel-control-prev,
+        .carousel-control-next {
+            filter: invert(100%);
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 50px; 
+            width: auto;
+            z-index: 1000;
+    }
+    </style>
+{% endblock %}
+
+
 
 {% block extra_js %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

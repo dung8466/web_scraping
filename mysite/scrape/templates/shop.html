@@ -1,0 +1,124 @@
+{%extends 'search_form.html' %}
+
+{% load humanize %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'style.css' %}">
+<link href="toastr.css" rel="stylesheet"/>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+{% block content %}
+    <div class="container d-flex justify-content-start align-items-center gap-5">
+        <h1>{{ user.shop_name }}</h1>
+        <button class="btn btn-outline-primary">
+            <a href="{% url 'add_product' %}?next={{ request.path }}"> Add product </a>
+        </button>
+    </div>
+    <div class="container mt-3">
+    <div class="row">
+        {% if products|length > 5%}
+        <div class="col-1">
+            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+        </div>
+        {% endif %}
+        <div class="col-10">
+            <div id="productCarousel" class="carousel slide" data-bs-interval="false">
+                <div class="carousel-inner">
+                    <!-- Your carousel items here -->
+                    {% for p in products %}
+                {% if forloop.counter0|divisibleby:4 %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <div class="row row-cols-1 row-cols-md-4 g-4 d-flex">
+                {% endif %}
+                            <div class="col">
+                                <div class="card">
+                                    <!-- Your card content -->
+                                    <!-- ... -->
+                                    <img src="{{p.img}}" class="card-img-top" style="height:17.813em;width:auto;" alt="product image">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{p.name}}</h5>
+                                        <div class="rating">
+                                            <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 1 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                            <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 2 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                            <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 3 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                            <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 4 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                            <i style="color: 	#ffe234;" class="bi {% if p.average_rating == 5 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                                        </div>
+                                            {% if not user.is_shop %}
+                                            <a href="{% url 'add_review' p.id %}?next={{ request.path }}" id="add-review" class='text-decoration-none review-link mr-2'>
+                                                Review   
+                                            </a>
+                                            {% endif %}
+                                        <a href="{% url 'view_reviews' p.id %}?next={{ request.path }}" id="view-reviews" class="text-decoration-none">
+                                            View 
+                                        </a>
+                                        {% if p.current_price == 0 %}
+                                            <p class="card-text">Giá Liên Hệ</p>
+                                        {% else %}
+                                            <p class="card-text">{{p.current_price|intcomma}} đồng.</p>
+                                        {% endif %}
+                                        <p class="card-text">Store: {{p.place}}</p>
+                                        <p class="card-text">Add at {{p.date_add}}</p>
+                                        <div style="display: flex; gap:10px;">
+                                            <button class="btn-outline-secondary btn">
+                                                <a href="{% url 'change_product' p.id %}?next={{ request.path }}" id="add-review" class='text-decoration-none review-link mr-2'>
+                                                        Change  
+                                                </a>
+                                            </button>
+                                            <form action="{% url 'delete_product' p.id %}" method="post">
+                                                {% csrf_token %}
+                                                <button class="remove-from-cart-btn btn btn-danger">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                {% if forloop.counter|divisibleby:4 or forloop.last %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+                </div>
+        </div>
+    </div>
+        {% if products|length > 5%}
+        <div class="col-1">
+            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+
+<style>
+    .carousel {
+        /* Additional styling for the carousel */
+        height: 100%;
+    }
+    .carousel-control-prev,
+    .carousel-control-next {
+        filter: invert(100%);
+        /* Additional styling for the carousel controls */
+    }
+</style>
+
+<script>
+    $('#productCarousel').carousel({
+    wrap: false // Prevents the carousel from wrapping when reaching the end
+});
+
+$('.carousel-control-prev').click(function() {
+    $('#productCarousel').carousel('prev');
+});
+
+$('.carousel-control-next').click(function() {
+    $('#productCarousel').carousel('next');
+});
+</script>
+{% endblock %}

@@ -36,7 +36,7 @@ chrome_path = ChromeDriverManager().install()
 chrome_service = Service(chrome_path)
 driver = Chrome(options=options, service=chrome_service)
 driver.implicitly_wait(5)
-wait = WebDriverWait(driver, 10)
+wait = WebDriverWait(driver, 5)
 
 
 
@@ -88,6 +88,11 @@ def cellphones(query):
                 if item_instance.current_price != item.current_price:
                 # Record price change
                     record_price_change(item_instance, item.current_price)
+            else:
+                # Record price change
+                # record_price_change(item, item.current_price)
+                price_history = PriceHistory(product=item, price=item.current_price, date=item.date_add)
+                price_history.save()
             if any(obj.name == item.name for obj in lists):
                 pass
             else:
@@ -132,6 +137,10 @@ def media_mart(query):
                 if item_instance.current_price != item.current_price:
                 # Record price change
                     record_price_change(item_instance, item.current_price)
+            else:
+                # Record price change
+                price_history = PriceHistory(product=item, price=item.current_price, date=item.date_add)
+                price_history.save()
             # lists.append(item)
             lists.append(item_instance)
         except:
@@ -145,7 +154,7 @@ def nguyen_kim(query):
     }
     s = requests.Session()
     s.headers.update(headers)
-    big_list = []
+    big_lists = []
     search = query.replace(' ', '+')
     for i in range(1, 3):
         r = s.get(f'https://www.nguyenkim.com/tim-kiem.html?tu-khoa={search}&trang={i}')
@@ -156,7 +165,6 @@ def nguyen_kim(query):
         # _ = all_prods[0]
             try:
                 prod_data = json.loads(prod.string.split('dataRenderProduct.push(')[1].split(');')[0])
-                print(prod_data)
                 item = Item(
                     name=prod_data["display_name"],
                     url=prod_data["link"],
@@ -181,11 +189,16 @@ def nguyen_kim(query):
                     if item_instance.current_price != item.current_price:
                     # Record price change
                         record_price_change(item_instance, item.current_price)
+                else:
+                # Record price change
+                    price_history = PriceHistory(product=item, price=item.current_price, date=item.date_add)
+                    price_history.save()
                 # big_list.append(item)
-                lists.append(item_instance)
+                big_lists.append(item_instance)
+                print(big_lists)
             except:
                 pass
-    return big_list
+    return big_lists
 
 def gg_shopping(query):
   search = query.replace(' ', '+')
@@ -220,6 +233,10 @@ def gg_shopping(query):
             if item_instance.current_price != item.current_price:
             # Record price change
                 record_price_change(item_instance, item.current_price)
+        else:
+                # Record price change
+            price_history = PriceHistory(product=item, price=item.current_price, date=item.date_add)
+            price_history.save()
         # big_list.append(item)
         big_list.append(item_instance)
     except:
@@ -255,18 +272,18 @@ def cellphones_one(query):
             else:
                 c = Decimal(c.replace("₫", "").replace(".","").replace(" ",""))
             # Create a dictionary with the scraped data and add it to the temporary list
-            item_data = {
-                'url': a,
-                'name': b,
-                'current_price': c,
-                'place': "Cellphones",
-                'img': d,
-                'date_add': datetime.datetime.now(tz=timezone.utc)
-            }
-            lists.append(item_data)
+            item = Item(
+                name=b,
+                current_price=c,
+                place="Cellphones",
+                img=d,
+                url=a,
+                date_add=e
+            )
+            return [item]
         except:
             pass
-    return lists
+    return []
 
 def media_mart_one(query):
     lists = []
@@ -281,18 +298,18 @@ def media_mart_one(query):
     if items:
         _ = items[0]
         try:
-            item_data = {
-                'url': _.find_element(By.CSS_SELECTOR, "a[class*='product-item']").get_attribute('href'),
-                'name': _.find_element(By.CSS_SELECTOR, "p[class*='card-title']").text,
-                'current_price': Decimal(_.find_element(By.CSS_SELECTOR, "p[class*='card-text']").text.replace("₫", "").replace(".", "").replace(" ", "")),
-                'place': "Media Mart",
-                'img': _.find_element(By.CSS_SELECTOR, "img").get_attribute('src'),
-                'date_add': datetime.datetime.now(tz=timezone.utc)
-            }
-            lists.append(item_data)
+            item = Item(
+                name=_.find_element(By.CSS_SELECTOR, "p[class*='card-title']").text,
+                url= _.find_element(By.CSS_SELECTOR, "a[class*='product-item']").get_attribute('href'),
+                current_price=Decimal(_.find_element(By.CSS_SELECTOR, "p[class*='card-text']").text.replace("₫", "").replace(".", "").replace(" ", "")),
+                place="Media Mart",
+                img=_.find_element(By.CSS_SELECTOR, "img").get_attribute('src'),
+                date_add=datetime.datetime.now(tz=timezone.utc)
+            )
+            return [item]
         except:
             pass
-    return lists
+    return []
 
 def nguyen_kim_one(query):
     headers = {
@@ -325,9 +342,75 @@ def nguyen_kim_one(query):
 def record_price_change(product, new_price):
     # Retrieve the current price from the database
     current_price = product.current_price
-
+    date = datetime.datetime.now(tz=timezone.utc)
     # Compare the current price with the new price
     if current_price != new_price:
         # Price has changed, record it
-        price_history = PriceHistory(productItem=product, price=new_price)
+        price_history = PriceHistory(product=product, price=new_price, date=date)
         price_history.save()
+
+def scrape_fake_product(query):
+    lists = []
+    url = "https://dung8466.github.io/fake_site/"
+    driver.get(url)
+    content = driver.find_element(By.ID, 'product-container')
+    print(content)
+    try:
+        a = content.find_element(By.CSS_SELECTOR, "a").get_attribute('href')
+        b = content.find_element(By.CSS_SELECTOR, "h1").text
+        c = Decimal(content.find_element(By.CSS_SELECTOR, "p[id*='product-price']").text)
+        d = content.find_element(By.CSS_SELECTOR, "img").get_attribute('src')
+        item = Item (
+            url = a,
+            name = b,
+            current_price = c,
+            place = "Fake",
+            img = d,
+            date_add = datetime.datetime.now(tz=timezone.utc)
+        )
+        item_instance, created = Product.objects.update_or_create(
+            name=item.name,
+            place=item.place,
+            defaults={
+                'current_price': item.current_price,
+                'img': item.img,
+                'url': item.url,
+                'date_add': item.date_add
+            }
+        )
+        if not created:
+                # Check if the current price is different from the previous price
+            if item_instance.current_price != item.current_price:
+                # Record price change
+                record_price_change(item_instance, item.current_price)
+        else:
+                # Record price change
+            record_price_change(item, item.current_price)
+        lists.append(item_instance)
+    except:
+        pass
+    return lists
+
+def scrape_fake_product_one(query):
+    lists = []
+    url = "https://dung8466.github.io/fake_site/"
+    driver.get(url)
+    content = driver.find_element(By.ID, 'product-container')
+    try:
+        a = content.find_element(By.CSS_SELECTOR, "a").get_attribute('href')
+        b = content.find_element(By.CSS_SELECTOR, "h1").text
+        c = Decimal(content.find_element(By.CSS_SELECTOR, "p[id*='product-price']").text)
+        d = content.find_element(By.CSS_SELECTOR, "img").get_attribute('src')
+        item = Item (
+            url = a,
+            name = b,
+            current_price = c,
+            place = "Fake",
+            img = d,
+            date_add = datetime.datetime.now(tz=timezone.utc)
+        )
+        record_price_change(item, item.current_price)
+        lists.append(item)
+    except:
+        pass
+    return lists

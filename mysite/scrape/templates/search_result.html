@@ -4,6 +4,7 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'style.css' %}">
 <link href="toastr.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 {% block content %}
 
@@ -38,25 +39,27 @@
                 </li>
             {% endfor %}
         </ul> {% endcomment %}
-        <table class="table table-bordered">
+        <table class="table table-bordered custom-class">
             <thead>
                 <tr>
-                    <th scope="col">Image</th>
-                    <th scope="col">Product</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Store</th>
-                    <th scope="col">Date added</th>
-                    <th scope="col">Add to Favourite</th>
+                    <th scope="col" class="col-2" style="background-color: #1C4E80; color: white;">Image</th>
+                    <th scope="col" class="col-4" style="background-color: #1C4E80; color: white;">Product</th>
+                    <th scope="col" class="col-1,5" style="background-color: #1C4E80; color: white;">Price</th>
+                    <th scope="col" style="background-color: #1C4E80; color: white;">Store</th>
+                    <th scope="col" style="background-color: #1C4E80; color: white;">Date added</th>
+                    {% if not user.is_shop %}
+                        <th scope="col" style="background-color: #1C4E80; color: white;">Favourite</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
                 {% for p in lists %}
                 <tr>
                     <th scope="row">
-                        <img src="{{p.img}}" class="card-img-top" style="height:17.813em;width:auto;" alt="product image">
+                        <img src="{{p.img}}" class="card-img-top" style="width: 200px; height: 200px;" alt="product image">
                     </th>
                     <td>
-                        <h5 class="card-title">
+                        <h5 class="card-title d-flex flex-column align-items-start">
                             <a href="{{p.url}}" target="_blank">
                                 {{p.name}}
                                 {% comment %} <a href="{% url 'add_review' product.id %}">Add a Review</a>
@@ -69,10 +72,12 @@
                                 <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 4 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
                                 <i style="color: 	#ffe234;" class="bi {% if p.average_rating == 5 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
                             </div>
-                            <a href="{% url 'add_review' p.id %}" id="add-review" class='link-underline-opacity-0'>
+                            {% if not user.is_shop %}
+                            <a href="{% url 'add_review' p.id %}?next={{ request.path }}" id="add-review" class='text-decoration-none review-link mr-2'>
                                     Review   
                             </a>
-                            <a href="{% url 'view_reviews' p.id %}"id="view-reviews" class="link-underline-opacity-0">
+                            {% endif %}
+                            <a href="{% url 'view_reviews' p.id %}?next={{ request.path }}" id="view-reviews" class="text-decoration-none">
                                     View 
                             </a>  
                         </h5>
@@ -86,7 +91,7 @@
                         <form action="{% url 'price_history' p.id %}" method="post" id="price_history">
                             {% csrf_token %}
                             <button class="btn btn-primary" >
-                                Price History
+                                <i class="bi bi-bar-chart-line"></i>
                             </button>
                         </form>
                     </td>
@@ -96,6 +101,7 @@
                     <td>
                         <p class="card-text">{{p.date_add}}</p>
                     </td>
+                    {% if not user.is_shop %}
                     <td>
                         <form action="{% url 'add-to-favourite' p.id %}" method="post" id="add-to-favourite">
                             {% csrf_token %}
@@ -106,6 +112,7 @@
                             </button>
                         </form>
                     </td>
+                    {% endif%}
                 </tr>
                 {% endfor %}
             </tbody>
@@ -116,8 +123,11 @@
     
 <style>
     .fa-star-checked {
-    color: yellow;
-}
+        color: yellow;
+    }
+    .custom-class{
+        table-layout: fixed;
+    }
 </style>
 
 {% endblock %}
@@ -127,6 +137,7 @@
           integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
             crossorigin="anonymous"></script>
     <script src="toastr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script type="text/javascript"> 
         let csrftoken = '{{ csrf_token }}'
@@ -138,7 +149,7 @@
             url: $(this).attr('action'),
             data: $(this).serialize(),
             success: function (response) {
-                alert("Succes");
+                Swal.fire('Added to Favourite!');
                 toastr.options.closeButton = true;
                 toastr.success('Added to Favourite');
             }

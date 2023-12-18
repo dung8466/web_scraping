@@ -4,9 +4,12 @@
 {% block content %}
     <div class="mb-3">
         <form action="{% url 'products' %}" method="get">
+            <div class="container d-flex flex-row">
+            {% csrf_token %}
             {{ filterForm.as_p }}
             <input type="hidden" name="next" value="{{ request.path }}">
-            <input type="submit" value="Filter products">
+            </div>
+            <input type="submit" value="Find products" class="btn btn-primary ms-2">
         </form>
     </div>
     {% if product_list %}
@@ -38,29 +41,32 @@
             </li>
         {% endfor %}
         </ul> {% endcomment %}
-        <table class="table table-bordered table-sm">
+        <table class="table table-bordered custom-class">
             <thead>
                 <tr>
-                    <th scope="col">Image</th>
-                    <th scope="col">Product</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Store</th>
-                    <th scope="col">Date added</th>
-                    <th scope="col">Favourite</th>
-
+                    <th scope="col" class="table-primary col-3" style="background-color: #1C4E80; color: white;">Image</th>
+                    <th scope="col" class="table-primary col-4" style="background-color: #1C4E80; color: white;">Product</th>
+                    <th scope="col" class="table-primary col-1,5" style="background-color: #1C4E80; color: white;">Price</th>
+                    <th scope="col" class="table-primary" style="background-color: #1C4E80; color: white;">Store</th>
+                    <th scope="col" class="table-primary" style="background-color: #1C4E80; color: white;">Date added</th>
+                    {% if not user.is_shop %}
+                        <th scope="col" class="table-primary" style="background-color: #1C4E80; color: white;">Favourite</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
                 {% for p in product_list %}
                 <tr>
-                    <th scope="row">
+                    <td scope="row">
                         <img src="{{p.img}}" class="card-img-top" style="height:17.813em;width:auto;" alt="product image">
-                    </th>
-                    <td>
-                        <h5 class="card-title d-flex flex-column align-items-start">
+                    </td>
+                    <td scope="row">
+                        <h5 class="card-title">
                             <a href="{{p.url}}" target="_blank">
                                 {{p.name}}
                             </a>
+                        </h5>
+                        <div class="d-flex flex-column align-items-start">
                             <div class="rating">
                                 <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 1 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
                                 <i style="color: 	#ffe234;" class="bi {% if p.average_rating >= 2 %}bi-star-fill{% else %}bi-star{% endif %}"></i>
@@ -75,15 +81,17 @@
                                 <span class="fa fa-star{% if p.average_rating >= 4 %}-checked{% endif %}"></span>
                                 <span class="fa fa-star{% if p.average_rating == 5 %}-checked{% endif %}"></span>
                             </div> {% endcomment %}
-                            <a href="{% url 'add_review' p.id %}" id="add-review" class="text-decoration-none mr-2">
-                                    Review   
-                            </a>
-                            <a href="{% url 'view_reviews' p.id %}"id="view-reviews" class="text-decoration-none">
+                            {% if not user.is_shop %}
+                                <a href="{% url 'add_review' p.id %}?next={{ request.path }}" id="add-review" class="text-decoration-none mr-2 review-link">
+                                        Review   
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'view_reviews' p.id %}?next={{ request.path }}" id="view-reviews" class="text-decoration-none">
                                     View 
                             </a> 
-                        </h5>
+                        </div>
                     </td>
-                    <td>
+                    <td scope="row">
                         {% if p.current_price == 0 %}
                             <p class="card-text">Giá Liên Hệ</p>
                         {% else %}
@@ -92,17 +100,18 @@
                         <form action="{% url 'price_history' p.id %}" method="post" id="price_history">
                             {% csrf_token %}
                             <button class="btn btn-primary" >
-                                Price History
+                                <i class="bi bi-bar-chart-line"></i>
                             </button>
                         </form>
                     </td>
-                    <td>
+                    <td scope="row">
                         <p class="card-text">{{p.place}}</p>
                     </td>
-                    <td>
+                    <td scope="row">
                         <p class="card-text">{{p.date_add}}</p>
                     </td>
-                    <td>
+                    {% if not user.is_shop %}
+                    <td scope="row">
                         {% if p.id in favourite_items.product_id  %}
                             <form action="{% url 'remove-from-favourite' p.id %}" method="post">
                             {% csrf_token %}
@@ -121,11 +130,22 @@
                             </form>
                         {% endif %}
                     </td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
-    <p>Select some fiters to display results</p>
+    <p>There is no product searched!</p>
     {% endif %}
+
+<style>
+    .container {
+        margin-left: 0!important;
+    }
+    .custom-class{
+        table-layout: fixed;
+    }
+</style>
+
 {% endblock content %}

@@ -5,6 +5,7 @@
   <div class="container">
   <form method="post" action="{% url 'add_review' product.id %}">
     {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
     <div class="mb-3">
       <label for="rating" class="form-label">Rating</label>
       <select name="rating" id="rating" class="form-select">
@@ -24,18 +25,13 @@
         Submit
     </button>
   </form>
-
-</div>
-    <button class="btn btn-secondary" onclick="history.back()">Back to Product</button>
+<button class="btn btn-secondary mt-2" onclick="history.back()">Back</button>
+  </div>
+    
   {% comment %} <form method="post">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ request.GET.next }}">
      
   </form>  {% endcomment %}
 
-<script>
-    function goBack() {
-      window.history.back();
-    }
-  </script>
 {% endblock %}
